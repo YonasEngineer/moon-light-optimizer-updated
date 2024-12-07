@@ -1,10 +1,11 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+
 from windrose import WindroseAxes
 import matplotlib.cm as cm
 
-class WindAnalysis:
+class WeatherAnalysis:
     """
     A class for performing wind analysis using wind roses and radial plots.
     """
@@ -90,3 +91,22 @@ class WindAnalysis:
         ax.set_xticklabels(sector_avg.index, fontsize=10)
         ax.set_title("Radial Bar Plot of Wind Speed by Direction", fontsize=16)
         plt.show()
+
+    def analyze_temperature(self, temp_col='Temperature', rh_col='RH', solar_rad_col='SolarRadiation'):
+        # Drop NaN values for the analysis
+        temp_data = self.data[[temp_col, rh_col, solar_rad_col]].dropna()
+
+        # Scatter plot with color representing Solar Radiation
+        scatter = plt.scatter(temp_data[rh_col], temp_data[temp_col], c=temp_data[solar_rad_col], cmap='viridis')
+        
+        # Add labels and colorbar
+        plt.xlabel("Relative Humidity (%)")
+        plt.ylabel("Temperature (°C)")
+        plt.colorbar(scatter, label="Solar Radiation (GHI)")  # Colorbar based on Solar Radiation
+
+        plt.show()
+        
+        # Calculate and print correlation matrix
+        corr_matrix = temp_data.corr()
+        print("Correlation Matrix:")
+        print(corr_matrix)
