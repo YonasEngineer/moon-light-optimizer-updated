@@ -159,3 +159,43 @@ class WeatherAnalysis:
             print(f"Processed Z-scores for column '{col}': Found {len(flagged)} flagged points.")
         
         return flagged_data
+    
+    def create_bubble_chart(self, x_col, y_col, size_col, color_col=None, title=None):
+        """
+        Create a bubble chart to explore relationships between variables.
+        
+        :param x_col: Column name for the x-axis.
+        :param y_col: Column name for the y-axis.
+        :param size_col: Column name to determine bubble sizes.
+        :param color_col: Column name for bubble colors (optional).
+        :param title: Title of the plot (optional).
+        """
+        if x_col not in self.data.columns or y_col not in self.data.columns or size_col not in self.data.columns:
+            raise ValueError(f"One or more specified columns ({x_col}, {y_col}, {size_col}) do not exist in the dataset.")
+        
+        if color_col and color_col not in self.data.columns:
+            raise ValueError(f"Color column '{color_col}' does not exist in the dataset.")
+        
+        # Normalize size values for bubble sizes
+        size = self.data[size_col]
+        normalized_size = (size - size.min()) / (size.max() - size.min()) * 1000  # Scale for visualization
+
+        # Scatter plot with bubble size
+        plt.figure(figsize=(10, 6))
+        scatter = plt.scatter(
+            self.data[x_col],
+            self.data[y_col],
+            s=normalized_size,  # Bubble size
+            c=self.data[color_col] if color_col else 'blue',  # Bubble color
+            alpha=0.7,
+            cmap='viridis' if color_col else None
+        )
+        
+        if color_col:
+            plt.colorbar(scatter, label=color_col)
+
+        plt.title(title if title else f"{y_col} vs. {x_col} with bubble size based on {size_col}")
+        plt.xlabel(x_col)
+        plt.ylabel(y_col)
+        plt.grid(True, linestyle='--', alpha=0.7)
+        plt.show()
