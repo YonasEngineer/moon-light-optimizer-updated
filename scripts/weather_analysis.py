@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -18,6 +19,43 @@ class WeatherAnalysis:
         - data (pd.DataFrame): The DataFrame containing wind speed ('WS') and wind direction ('WD') columns.
         """
         self.data = data
+    def data_quality_check(self, columns_to_check=None, positive_only_columns=None, z_score_threshold=3):
+        """
+        Perform a data quality check for missing values, outliers, and invalid entries.
+
+        :param columns_to_check: List of columns to check for missing values and outliers.
+        :param positive_only_columns: List of columns where only positive values are allowed.
+        :param z_score_threshold: Threshold for flagging outliers based on Z-scores (default: 3).
+        :return: Dictionary containing the results of the quality check.
+        """
+        results = {}
+
+        # Default columns to check if not provided
+        if columns_to_check is None:
+            columns_to_check = ['GHI', 'DNI', 'DHI', 'ModA', 'ModB', 'WS', 'WSgust']
+
+        if positive_only_columns is None:
+            positive_only_columns = ['GHI', 'DNI', 'DHI', 'WS', 'WSgust']
+
+        # Check for missing values
+        results['missing_values'] = self.data[columns_to_check].isnull().sum().to_dict()
+
+        # Check for negative values in specified columns
+        negative_values = {}
+        for col in positive_only_columns:
+            if col in self.data.columns:
+                negative_values[col] = (self.data[col] < 0).sum()
+        results['negative_values'] = negative_values
+
+        # Detect outliers using Z-scores
+        outliers = {}
+        for col in columns_to_check:
+            if col in self.data.columns and self.data[col].dtype in [np.float64, np.int64]:
+                z_scores = (self.data[col] - self.data[col].mean()) / self.data[col].std()
+                outliers[col] = (np.abs(z_scores) > z_score_threshold).sum()
+        results['outliers'] = outliers
+
+        return results
 
     def plot_wind_rose(self, wind_speed_col='WS', wind_dir_col='WD', bins=None, cmap='coolwarm'):
         """
@@ -237,4 +275,25 @@ class WeatherAnalysis:
                 z_scores = np.abs((self.data[column] - self.data[column].mean()) / self.data[column].std())
                 self.data = self.data[z_scores <= threshold]
         return self.data
-1
+    def save_output(self, graph_filename=None, report_filename=None, folder="output"):
+        """
+        Save both graphs and reports to the specified folder.
+        
+        :param graph_filename: Name of the graph file to save (e.g., 'graph.png').
+        :param report_filename: Name of the report file to save (e.g., 'report.csv').
+        :param folder: The folder where outputs will be saved (default: 'output').
+        """
+        os.makedirs(folder, exist_ok=True)
+
+        # Save graph if filename is provided
+        if graph_filename:
+            filepath = os.path.join(folder, graph_filename)
+            plt.savefig(filepath, bbox_inches='tight')
+            print(f"Graph saved to {filepath}")
+            plt.close()
+
+        # Save report if filename is provided
+        if report_filename:
+            filepath = os.path.join(folder, report_filename)
+            self.data.to_csv(filepath, index=False)
+            print(f"Report saved to {filepath}")
