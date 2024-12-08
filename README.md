@@ -92,13 +92,6 @@ Contributions are welcome! Please follow these steps:
 4. Push to the branch (`git push origin feature-branch`).  
 5. Submit a pull request.  
 
----
-
-## **License**  
-This project is licensed under the [MIT License](LICENSE).  
-
----
-
 ## **Acknowledgments**  
 We extend our gratitude to the engineering team for providing critical environmental measurement data that drives this analysis.  
 
