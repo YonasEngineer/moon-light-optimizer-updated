@@ -110,3 +110,52 @@ class WeatherAnalysis:
         corr_matrix = temp_data.corr()
         print("Correlation Matrix:")
         print(corr_matrix)
+    def plot_histograms(self, columns):
+        import seaborn as sns
+
+        """
+        This function will plot histograms for the given columns.
+        
+        :param columns: List of columns to plot histograms for.
+        """
+        # Set up the matplotlib figure
+        plt.figure(figsize=(12, 8))
+        
+        for i, col in enumerate(columns, 1):
+            plt.subplot(2, 3, i)  # 2 rows, 3 columns of subplots
+            sns.histplot(self.data[col], kde=True, bins=30, color='skyblue', edgecolor='black')
+            plt.title(f"Histogram of {col}")
+            plt.xlabel(col)
+            plt.ylabel('Frequency')
+
+        plt.tight_layout()  # Adjust subplots to fit into figure area.
+        plt.show()
+    def calculate_z_scores(self, columns, threshold=3):
+        """
+        Calculate Z-scores for the specified columns and flag data points
+        that deviate significantly from the mean.
+        
+        :param columns: List of columns to calculate Z-scores for.
+        :param threshold: Z-score threshold for flagging significant deviations.
+                          Default is 3 (corresponds to approximately 99.7% of data in a normal distribution).
+        :return: A dictionary with column names as keys and flagged rows as values.
+        """
+        flagged_data = {}
+        
+        for col in columns:
+            if col not in self.data.columns:
+                print(f"Warning: {col} is not in the dataset.")
+                continue
+            
+            # Calculate Z-scores
+            mean = self.data[col].mean()
+            std = self.data[col].std()
+            self.data[f"{col}_zscore"] = (self.data[col] - mean) / std
+            
+            # Flag rows exceeding the threshold
+            flagged = self.data[np.abs(self.data[f"{col}_zscore"]) > threshold]
+            flagged_data[col] = flagged
+            
+            print(f"Processed Z-scores for column '{col}': Found {len(flagged)} flagged points.")
+        
+        return flagged_data
