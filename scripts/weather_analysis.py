@@ -199,3 +199,42 @@ class WeatherAnalysis:
         plt.ylabel(y_col)
         plt.grid(True, linestyle='--', alpha=0.7)
         plt.show()
+    def clean_data(self):
+        """
+        Clean the dataset by:
+        - Dropping columns with all null values.
+        - Filling missing values where appropriate.
+        - Removing rows with anomalies based on Z-scores for numerical columns.
+        """
+        # Drop entirely null columns
+        self.data.dropna(axis=1, how='all', inplace=True)
+
+        # Fill missing values for numeric columns with the mean
+        numeric_cols = self.data.select_dtypes(include=[np.number]).columns
+        self.data[numeric_cols] = self.data[numeric_cols].fillna(self.data[numeric_cols].mean())
+
+        # Fill missing values for categorical columns with 'Unknown'
+        categorical_cols = self.data.select_dtypes(include=['object']).columns
+        self.data[categorical_cols] = self.data[categorical_cols].fillna('Unknown')
+
+        # Handle anomalies using Z-score for numerical columns
+        self.calculate_z_scores1(columns=numeric_cols)
+
+        return self.data
+    
+
+
+    def calculate_z_scores1(self, columns, threshold=3):
+        """
+        Calculate Z-scores for specified columns and return rows with Z-scores within the threshold.
+        
+        :param columns: List of column names to calculate Z-scores for.
+        :param threshold: Z-score threshold for identifying anomalies (default: 3).
+        :return: DataFrame with rows having Z-scores within the threshold.
+        """
+        for column in columns:
+            if column in self.data.columns:
+                z_scores = np.abs((self.data[column] - self.data[column].mean()) / self.data[column].std())
+                self.data = self.data[z_scores <= threshold]
+        return self.data
+1
