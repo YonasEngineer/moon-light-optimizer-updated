@@ -79,9 +79,11 @@ As an Analytics Engineer, the primary objective of this analysis is to:
 
 3. Run the analysis notebook:  
    ```bash
-   jupyter notebook eda.ipynb
+   jupyter notebook benin-malanville.ipynb
+   jupyter notebook eda_combined_data_sierra_leone_togo_benin.ipynb.ipynb 
+   jupyter notebook sierraleone-bumbuna.ipynb
+   jupyter notebook togo-dapaong_qc.ipynb
    ```  
-
 ---
 
 ## **Contributing**  
